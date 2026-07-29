@@ -3,24 +3,45 @@ import {
   SafeAreaView,
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Platform,
 } from 'react-native';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   const handleLogout = () => {
-    Alert.alert('Logout berhasil');
+    const doLogout = () => {
+      navigation?.getParent()?.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      }) || navigation?.navigate('Login');
+    };
+
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Apakah Anda yakin ingin keluar dari akun?');
+      if (confirmed) {
+        alert('Logout berhasil!');
+        doLogout();
+      }
+    } else {
+      Alert.alert('Konfirmasi Logout', 'Apakah Anda yakin ingin keluar dari akun?', [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('Informasi', 'Logout berhasil!');
+            doLogout();
+          },
+        },
+      ]);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80' }}
-          style={styles.avatar}
-        />
         <Text style={styles.name}>Danindra</Text>
         <Text style={styles.email}>danindra@example.com</Text>
 
@@ -42,12 +63,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 16,
   },
   name: {
     fontSize: 24,
